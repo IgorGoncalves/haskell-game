@@ -2,7 +2,7 @@ module Main where
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
-import Graphics.Gloss.Interface.Pure.Simulatecdn
+import Graphics.Gloss.Interface.Pure.Simulate
 import Graphics.Gloss.Interface.Pure.Display
 
 data ContexWorld = Play Player Player Ball Goal Goal | GameOver String
@@ -26,7 +26,7 @@ maxX = 300
 maxY = 300
 
 initialWorld :: ContexWorld
-initialWorld = Play (Player (-270,0) (0, 50) (10, 70)) 
+initialWorld = Play (Player (-270,0) (0, 0) (10, 70)) 
                     (Player (270,0) (0, 80) (10, 70))
                     (Ball (0,0) (100, 40) 15)
                     (Goal (-275, 0) 0 (10, 180))
@@ -63,31 +63,27 @@ drawWorld (Play (Player (px,py) (pvx,pvy) (pw, ph))
 
 simulateWorld :: Float -> (ContexWorld -> ContexWorld)
 simulateWorld _ (GameOver s) = GameOver s
-simulateWorld timeStep (Play (Player pPosition (pvx,pvy) (pw, ph))
-                             (Player pcPosition (pcvx,pcvy) pcsize)
-                             (Ball  (bx, by) (bvx, bvy) r) 
-                                goal
-                                cgoal) = 
-    collision (Play (Player pPosition (pvx,pvy) (pw, ph)) 
-                    (updateComputer timeStep (Ball (bx, by) (bvx, bvy) r) (Player pcPosition (pcvx,pcvy) pcsize)) 
-                    (updateBall timeStep (Ball  (bx, by) (bvx, bvy) r)) 
-                    goal
-                    cgoal)
+simulateWorld timeStep (Play player cplayer ball goal cgoal) = nWorld
     where
+        nWorld = collision (Play nPlayer ncPlayer nBall goal cgoal)
+        nPlayer = updatePlayer timeStep player
+        ncPlayer = updateComputer timeStep nBall cplayer
+        nBall = updateBall timeStep ball
+        
         collision :: ContexWorld -> ContexWorld
         collision (Play (Player (px, py) (pvx,pvy) (pw, ph))
                         (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
                         (Ball  (bx, by) (bvx, bvy) r)
                         (Goal (gx, gy) j (gw, gh))
                         (Goal (gcx, gcy) jc gcsize))
-            |   bx <= (px + r + pw/2) && 
-                by+r <= (py + ph/2) &&
-                by-r >= (py - ph/2) = Play (Player (px, py) (pvx,pvy) (pw, ph) )
+            |   bx <= (px + pw/2 + r) && 
+                by <= (py + ph/2) &&
+                by >= (py - ph/2) = Play (Player (px, py) (pvx,pvy) (pw, ph) )
                                         (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
                                         (Ball (nx, ny) (ndx, ndy) r)
                                         (Goal (gx, gy) j (gw, gh))
                                         (Goal (gcx, gcy) jc gcsize)
-            |   bx >= (pcx - r - pw/2) && 
+            |   bx >= (pcx - pw/2 - r) && 
                 by <= (pcy + ph/2) &&
                 by >= (pcy - ph/2) = Play (Player (px, py) (pvx,pvy) (pw, ph) )
                                         (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
@@ -95,11 +91,11 @@ simulateWorld timeStep (Play (Player pPosition (pvx,pvy) (pw, ph))
                                         (Goal (gx, gy) j (gw, gh))
                                         (Goal (gcx, gcy) jc gcsize)
             |   bx <= (gx + r) && 
-                by <= (gy + gh/2) && 
-                by >= (gy - gh/2)  = GameOver "Computer Win"
-            |   bx >= (gcx - r) && 
-                by <= (gcy + gh/2) && 
-                by >= (gcy - gh/2)  = GameOver "Player Win"
+                by + r <= (gy + gh/2) && 
+                by - r >= (gy - gh/2)  = GameOver "Computer Win"
+            |   bx + r >= gcx && 
+                by+r <= (gcy + gh/2) && 
+                by-r >= (gcy - gh/2)  = GameOver "Player Win"
             
             | otherwise = Play  (Player (px, py) (pvx,pvy) (pw, ph) )
                                 (Player (pcx, pcy) (pcvx,pcvy) pcsize)
@@ -108,7 +104,7 @@ simulateWorld timeStep (Play (Player pPosition (pvx,pvy) (pw, ph))
                                 (Goal (gcx, gcy) jc gcsize)
             where 
                 (nx, ndx) = (bx, if bx > 0 then -bvx-pvy else -bvx+pvy)
-                (ny, ndy) = (by, bvy-(pvy/2))
+                (ny, ndy) = (by, bvy-pvy)
 
         updateBall :: Float -> Ball -> Ball
         updateBall dt (Ball (x, y) (dx, dy) r) = Ball (nx, ny) (ndx, ndy) r
@@ -121,37 +117,40 @@ simulateWorld timeStep (Play (Player pPosition (pvx,pvy) (pw, ph))
                     | otherwise = (nh, dh)
                     where nh = h + dt * dh
 
+        updatePlayer:: Float -> Player -> Player
+        updatePlayer dt (Player (px, py) (pvx,pvy) (pw, ph)) = 
+                Player (px, py') (pvx, pvy) (pw, ph)
+                where
+                    py' = py + dt * pvy
+        
+        
         updateComputer:: Float -> Ball -> Player -> Player
-        updateComputer dt (Ball (bx, by) (bvx,bvy) r) (Player (pcx, pcy) (pcvx,pcvy) (pcw, pch) ) = Player (pcx, nPos) (pcvx, nvel) (pcw, pch)
+        updateComputer dt (Ball (bx, by) (bvx,bvy) r) (Player (pcx, pcy) (pcvx,pcvy) (pcw, pch) ) = 
+            Player (pcx, pcy') (pcvx, pcvx') (pcw, pch)
             where      
-                nPos :: Float
-                nPos                     
+                pcy' :: Float
+                pcy'                     
                     | bvy >= 0 && by > pcy = pcy + dt * pcvy
                     | bvy < 0 && by < pcy = pcy + dt * pcvy
                     | otherwise = pcy
                     
-                nvel:: Float
-                nvel 
+                pcvx' :: Float
+                pcvx' 
                     | bvy >= 0 = if pcvy > 0 then pcvy else -pcvy
                     | bvy < 0 = if pcvy < 0 then pcvy else -pcvy
 
 
 handleEvents :: Event -> ContexWorld -> ContexWorld
 handleEvents (EventKey (SpecialKey KeyUp) state _ _) 
-             (Play (Player (px,py) (pvx,pvy) (pw, ph)) 
-             cplayer 
-             ball 
-             goal 
-             cgoal) = Play nPlayer cplayer ball goal cgoal
-    where
-        npx = if state == Down then px + pvx else px 
-        npy = if state == Down then py + pvy else py
-        nPlayer = Player (npx, npy) (pvx,pvy) (pw, ph) 
-handleEvents (EventKey (SpecialKey KeyDown) state _ _) (Play (Player (px,py) (pvx,pvy) (pw, ph)) cplayer ball goal cgoal) = Play nPlayer cplayer ball goal cgoal
-    where
-        npx = if state == Down then px - pvx else px 
-        npy = if state == Down then py - pvy else py
-        nPlayer = Player (npx, npy) (pvx,pvy) (pw, ph) 
+             (Play (Player (px,py) (pvx,pvy) (pw, ph)) cplayer ball goal cgoal) = 
+                Play (Player (px,py) (pvx, pvy') (pw, ph)) cplayer ball goal cgoal
+                where
+                    pvy' = if state == Down then 80 else 0
+handleEvents (EventKey (SpecialKey KeyDown) state _ _) 
+             (Play (Player (px,py) (pvx,pvy) (pw, ph)) cplayer ball goal cgoal) = 
+                Play (Player (px,py) (pvx, pvy') (pw, ph)) cplayer ball goal cgoal
+                where
+                    pvy' = if state == Down then (-80) else 0
 handleEvents _ game = game
     
 
