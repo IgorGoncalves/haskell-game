@@ -5,30 +5,15 @@ module Game (
     simulateWorld
 )where
 
+import Collisions
+import Types.General
+
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
 import Graphics.Gloss.Interface.Pure.Simulate
 import Graphics.Gloss.Interface.Pure.Display
 
-data ContexWorld = Play Player Player Ball Goal Goal | GameOver String
-    deriving (Eq,Show)
 
-type Velocity     = (Float, Float)
-type Size     = (Float, Float)
-type PointInSpace = (Float, Float)
-
-data Ball =  Ball PointInSpace Velocity Float
-    deriving (Eq, Show)
-
-data Player = Player PointInSpace Velocity Size
-    deriving (Eq,Show)
-
-data Goal = Goal PointInSpace Int Size
-    deriving (Eq,Show)
-
-maxX, maxY :: Float
-maxX = 300
-maxY = 300
 
 initialWorld :: ContexWorld
 initialWorld = Play (Player (-270,0) (0, 0) (10, 70)) 
@@ -74,42 +59,6 @@ simulateWorld timeStep (Play player cplayer ball goal cgoal) = nWorld
         nPlayer = updatePlayer timeStep player
         ncPlayer = updateComputer timeStep nBall cplayer
         nBall = updateBall timeStep ball
-        
-        collision :: ContexWorld -> ContexWorld
-        collision (Play (Player (px, py) (pvx,pvy) (pw, ph))
-                        (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
-                        (Ball  (bx, by) (bvx, bvy) r)
-                        (Goal (gx, gy) j (gw, gh))
-                        (Goal (gcx, gcy) jc gcsize))
-            |   bx <= (px + pw/2 + r) && 
-                by <= (py + ph/2) &&
-                by >= (py - ph/2) = Play (Player (px, py) (pvx,pvy) (pw, ph) )
-                                        (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
-                                        (Ball (nx, ny) (ndx, ndy) r)
-                                        (Goal (gx, gy) j (gw, gh))
-                                        (Goal (gcx, gcy) jc gcsize)
-            |   bx >= (pcx - pw/2 - r) && 
-                by <= (pcy + ph/2) &&
-                by >= (pcy - ph/2) = Play (Player (px, py) (pvx,pvy) (pw, ph) )
-                                        (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
-                                        (Ball (nx, ny) (ndx, ndy) r)
-                                        (Goal (gx, gy) j (gw, gh))
-                                        (Goal (gcx, gcy) jc gcsize)
-            |   bx <= (gx + r) && 
-                by + r <= (gy + gh/2) && 
-                by - r >= (gy - gh/2)  = GameOver "Computer Win"
-            |   bx + r >= gcx && 
-                by+r <= (gcy + gh/2) && 
-                by-r >= (gcy - gh/2)  = GameOver "Player Win"
-            
-            | otherwise = Play  (Player (px, py) (pvx,pvy) (pw, ph) )
-                                (Player (pcx, pcy) (pcvx,pcvy) pcsize)
-                                (Ball (bx, by) (bvx, bvy) r) 
-                                (Goal (gx, gy) j (gw, gh))
-                                (Goal (gcx, gcy) jc gcsize)
-            where 
-                (nx, ndx) = (bx, if bx > 0 then -bvx-pvy else -bvx+pvy)
-                (ny, ndy) = (by, bvy-pvy)
 
         updateBall :: Float -> Ball -> Ball
         updateBall dt (Ball (x, y) (dx, dy) r) = Ball (nx, ny) (ndx, ndy) r
