@@ -28,7 +28,7 @@ maxY = 300
 initialWorld :: ContexWorld
 initialWorld = Play (Player (-270,0) (0, 0) (10, 70)) 
                     (Player (270,0) (0, 80) (10, 70))
-                    (Ball (0,0) (100, 40) 15)
+                    (Ball (-200,0) (-100, 40) 15)
                     (Goal (-275, 0) 0 (10, 180))
                     (Goal (275, 0) 1 (10, 180))
 
@@ -70,41 +70,104 @@ simulateWorld timeStep (Play player cplayer ball goal cgoal) = nWorld
         ncPlayer = updateComputer timeStep nBall cplayer
         nBall = updateBall timeStep ball
         
+        -- collision :: ContexWorld -> ContexWorld
+        -- collision (Play (Player (px, py) (pvx,pvy) (pw, ph))
+        --                 (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
+        --                 (Ball  (bx, by) (bvx, bvy) r)
+        --                 (Goal (gx, gy) j (gw, gh))
+        --                 (Goal (gcx, gcy) jc gcsize))
+        --     |   bx <= (px + pw/2 + r) && 
+        --         by <= (py + ph/2) &&
+        --         by >= (py - ph/2) = Play (Player (px, py) (pvx,pvy) (pw, ph) )
+        --                                 (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
+        --                                 (Ball (nx, ny) (ndx, ndy) r)
+        --                                 (Goal (gx, gy) j (gw, gh))
+        --                                 (Goal (gcx, gcy) jc gcsize)
+        --     |   bx >= (pcx - pw/2 - r) && 
+        --         by <= (pcy + ph/2) &&
+        --         by >= (pcy - ph/2) = Play (Player (px, py) (pvx,pvy) (pw, ph) )
+        --                                 (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
+        --                                 (Ball (nx, ny) (ndx, ndy) r)
+        --                                 (Goal (gx, gy) j (gw, gh))
+        --                                 (Goal (gcx, gcy) jc gcsize)
+        --     |   bx <= (gx + r) && 
+        --         by + r <= (gy + gh/2) && 
+        --         by - r >= (gy - gh/2)  = GameOver "Computer Win"
+        --     |   bx + r >= gcx && 
+        --         by+r <= (gcy + gh/2) && 
+        --         by-r >= (gcy - gh/2)  = GameOver "Player Win"
+            
+        --     | otherwise = Play  (Player (px, py) (pvx,pvy) (pw, ph) )
+        --                         (Player (pcx, pcy) (pcvx,pcvy) pcsize)
+        --                         (Ball (bx, by) (bvx, bvy) r) 
+        --                         (Goal (gx, gy) j (gw, gh))
+        --                         (Goal (gcx, gcy) jc gcsize)
+        --     where 
+        --         (nx, ndx) = (bx, if bx > 0 then -bvx-pvy else -bvx+pvy)
+        --         (ny, ndy) = (by, bvy-pvy)
+
         collision :: ContexWorld -> ContexWorld
         collision (Play (Player (px, py) (pvx,pvy) (pw, ph))
                         (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
                         (Ball  (bx, by) (bvx, bvy) r)
                         (Goal (gx, gy) j (gw, gh))
                         (Goal (gcx, gcy) jc gcsize))
-            |   bx <= (px + pw/2 + r) && 
-                by <= (py + ph/2) &&
-                by >= (py - ph/2) = Play (Player (px, py) (pvx,pvy) (pw, ph) )
-                                        (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
-                                        (Ball (nx, ny) (ndx, ndy) r)
-                                        (Goal (gx, gy) j (gw, gh))
-                                        (Goal (gcx, gcy) jc gcsize)
-            |   bx >= (pcx - pw/2 - r) && 
-                by <= (pcy + ph/2) &&
-                by >= (pcy - ph/2) = Play (Player (px, py) (pvx,pvy) (pw, ph) )
-                                        (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
-                                        (Ball (nx, ny) (ndx, ndy) r)
-                                        (Goal (gx, gy) j (gw, gh))
-                                        (Goal (gcx, gcy) jc gcsize)
+
+
+            |   colisaoPlayer (Ball  (bx, by) (bvx, bvy) r) (Player (px, py) (pvx,pvy) (pw, ph)) &&
+                colisaoPCPlayer (Ball  (bx, by) (bvx, bvy) r) (Player (px, py) (pvx,pvy) (pw, ph)) 
+                                (Player (pcx, pcy) (pcvx,pcvy) pcsize)                               = Play (Player (px, py) (pvx,pvy) (pw, ph) )
+                                                                                                            (Player (pcx, pcy) (pcvx,pcvy) pcsize) 
+                                                                                                            (Ball (nx, ny) (ndx, ndy) r) 
+                                                                                                            (Goal (gx, gy) j (gw, gh))
+                                                                                                            (Goal (gcx, gcy) jc gcsize)
             |   bx <= (gx + r) && 
                 by + r <= (gy + gh/2) && 
                 by - r >= (gy - gh/2)  = GameOver "Computer Win"
-            |   bx + r >= gcx && 
-                by+r <= (gcy + gh/2) && 
-                by-r >= (gcy - gh/2)  = GameOver "Player Win"
+
+            |   gol (Ball (bx, by) (bvx, bvy) r) (Goal (gx, gy) j (gw, gh)) (Goal (gcx, gcy) jc gcsize) = GameOver (vencedor (Ball (bx, by) (bvx, bvy) r) (Goal (gx, gy) j (gw, gh)) (Goal (gcx, gcy) jc gcsize))
             
             | otherwise = Play  (Player (px, py) (pvx,pvy) (pw, ph) )
                                 (Player (pcx, pcy) (pcvx,pcvy) pcsize)
-                                (Ball (bx, by) (bvx, bvy) r) 
+                                (Ball (bx, by) (bvx, bvy) r)
                                 (Goal (gx, gy) j (gw, gh))
                                 (Goal (gcx, gcy) jc gcsize)
+                                 
             where 
                 (nx, ndx) = (bx, if bx > 0 then -bvx-pvy else -bvx+pvy)
                 (ny, ndy) = (by, bvy-pvy)
+
+
+        colisaoPlayer :: Ball -> Player -> Bool
+        colisaoPlayer (Ball (bx, by) (bvx, bvy) r) (Player (px, py) (pvx,pvy) (pw, ph)) = bateu
+                where
+                    bateu = (bx <= (px + pw/2 + r)) && 
+                            (by <= (py + ph/2) ) && 
+                            (by >= (py - ph/2))
+                    
+
+        colisaoPCPlayer :: Ball -> Player ->Player -> Bool
+        colisaoPCPlayer (Ball (bx, by) (bvx, bvy) r) (Player (pcx, pcy) (pcvx,pcvy) pcsize) (Player (px, py) (pvx,pvy) (pw, ph))  = bateu
+                where
+                    bateu = (bx >= (pcx - pw/2 - r)) && 
+                            (by <= (pcy + ph/2) ) &&
+                            (by >= (pcy - ph/2) )
+        
+        gol :: Ball -> Goal -> Goal -> Bool
+        gol (Ball (bx, by) (bvx, bvy) r) (Goal (gx, gy) j (gw, gh)) (Goal (gcx, gcy) jc gcsize) = golPl || golPC 
+                    where
+                        golPl = (bx <= (gx + r) && by + r <= (gy + gh/2) && by - r >= (gy - gh/2) )
+                        golPC = (bx + r >= gcx && by+r <= (gcy + gh/2) && by-r >= (gcy - gh/2))
+        
+        vencedor :: Ball -> Goal -> Goal -> String
+        vencedor (Ball (bx, by) (bvx, bvy) r) (Goal (gx, gy) j (gw, gh)) (Goal (gcx, gcy) jc gcsize) = playerVencedor
+                    where
+                        playerVencedor = if bx <= (gx + r)
+                                            then
+                                                "Computer Win"
+                                            else
+                                                "Player Win"
+                    
 
         updateBall :: Float -> Ball -> Ball
         updateBall dt (Ball (x, y) (dx, dy) r) = Ball (nx, ny) (ndx, ndy) r
