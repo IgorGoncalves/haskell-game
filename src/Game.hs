@@ -6,6 +6,7 @@ module Game (
 
 import Types
 import Physics
+import Collisions
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Simulate
