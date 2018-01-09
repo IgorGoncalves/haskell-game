@@ -1,7 +1,7 @@
 module Physics (simulateWorld) where
 
 import Collisions
-import Types.General
+import Types
 
 updatePlayer:: Float -> Player -> Player
 updatePlayer dt (Player (px, py) (pvx,pvy) (pw, ph)) = 

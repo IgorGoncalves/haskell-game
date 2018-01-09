@@ -6,7 +6,6 @@ module Game (
 import Types
 
 import Graphics.Gloss
-import Graphics.Gloss.Interface.Pure.Game
 import Graphics.Gloss.Interface.Pure.Simulate
 import Graphics.Gloss.Interface.Pure.Display
 

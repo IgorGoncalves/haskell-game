@@ -1,6 +1,7 @@
 module Events where
 
 import Types
+import Graphics.Gloss.Interface.Pure.Game
 
 handleEvents :: Event -> ContexWorld -> ContexWorld
 handleEvents (EventKey (SpecialKey KeyUp) state _ _) 
