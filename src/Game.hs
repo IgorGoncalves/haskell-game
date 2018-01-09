@@ -1,9 +1,11 @@
 module Game (
     initialWorld,
-    drawWorld
+    drawWorld,
+    simulateWorld
 )where
 
 import Types
+import Physics
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Simulate
@@ -44,3 +46,12 @@ drawWorld (Play (Player (px,py) (pvx,pvy) (pw, ph))
         ball = color red (pictures [translate x y (circle r)])
         goal = color black (pictures [translate gx gy (rectangleSolid gw gh)])
         cgoal = color black (pictures [translate gcx gcy (rectangleSolid gcw gch)])
+
+simulateWorld :: Float -> (ContexWorld -> ContexWorld)
+simulateWorld _ (GameOver s) = GameOver s
+simulateWorld timeStep (Play player cplayer ball goal cgoal) = nWorld
+    where
+        nWorld = collision (Play nPlayer ncPlayer nBall goal cgoal)
+        nPlayer = updatePlayer timeStep player
+        ncPlayer = updateComputer timeStep nBall cplayer
+        nBall = updateBall timeStep ball

@@ -1,4 +1,4 @@
-module Physics (simulateWorld) where
+module Physics where
 
 import Collisions
 import Types
@@ -34,15 +34,6 @@ updateComputer dt (Ball (bx, by) (bvx,bvy) r) (Player (pcx, pcy) (pcvx,pcvy) (pc
         pcvx' 
             | bvy >= 0 = if pcvy > 0 then pcvy else -pcvy
             | bvy < 0 = if pcvy < 0 then pcvy else -pcvy
-
-simulateWorld :: Float -> (ContexWorld -> ContexWorld)
-simulateWorld _ (GameOver s) = GameOver s
-simulateWorld timeStep (Play player cplayer ball goal cgoal) = nWorld
-    where
-        nWorld = collision (Play nPlayer ncPlayer nBall goal cgoal)
-        nPlayer = updatePlayer timeStep player
-        ncPlayer = updateComputer timeStep nBall cplayer
-        nBall = updateBall timeStep ball
         
         
         
