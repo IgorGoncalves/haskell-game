@@ -1,4 +1,4 @@
-module Types.General where
+module Types where
 
 data ContexWorld = Play Player Player Ball Goal Goal | GameOver String
     deriving (Eq,Show)

@@ -1,13 +1,9 @@
 module Game (
     initialWorld,
-    drawWorld, 
-    handleEvents,
-    simulateWorld
+    drawWorld
 )where
 
-import Collisions
-import Types.General
-import Physics
+import Types
 
 import Graphics.Gloss
 import Graphics.Gloss.Interface.Pure.Game
@@ -49,17 +45,3 @@ drawWorld (Play (Player (px,py) (pvx,pvy) (pw, ph))
         ball = color red (pictures [translate x y (circle r)])
         goal = color black (pictures [translate gx gy (rectangleSolid gw gh)])
         cgoal = color black (pictures [translate gcx gcy (rectangleSolid gcw gch)])
-
-
-handleEvents :: Event -> ContexWorld -> ContexWorld
-handleEvents (EventKey (SpecialKey KeyUp) state _ _) 
-                (Play (Player (px,py) (pvx,pvy) (pw, ph)) cplayer ball goal cgoal) = 
-                Play (Player (px,py) (pvx, pvy') (pw, ph)) cplayer ball goal cgoal
-                where
-                    pvy' = if state == Down then 80 else 0
-handleEvents (EventKey (SpecialKey KeyDown) state _ _) 
-                (Play (Player (px,py) (pvx,pvy) (pw, ph)) cplayer ball goal cgoal) = 
-                Play (Player (px,py) (pvx, pvy') (pw, ph)) cplayer ball goal cgoal
-                where
-                    pvy' = if state == Down then (-80) else 0
-handleEvents _ game = game 

@@ -3,7 +3,7 @@ module Collisions
     collision
 )where
 
-import Types.General
+import Types
 
 collision :: ContexWorld -> ContexWorld
 collision (Play (Player (px, py) (pvx,pvy) (pw, ph))

@@ -1,7 +1,9 @@
 module Main where    
 
 import Game
+import Physics
 import Graphics.Gloss
+import Events
 
 main :: IO ()
 main =  play
