@@ -29,12 +29,12 @@ version :: Version
 version = Version [0,1,0,0] []
 bindir, libdir, dynlibdir, datadir, libexecdir, sysconfdir :: FilePath
 
-bindir     = "/home/igoncalves/Projects/haskell-aulas/game/.cabal-sandbox/bin"
-libdir     = "/home/igoncalves/Projects/haskell-aulas/game/.cabal-sandbox/lib/x86_64-linux-ghc-8.0.2/game-0.1.0.0"
-dynlibdir  = "/home/igoncalves/Projects/haskell-aulas/game/.cabal-sandbox/lib/ghc-8.0.2/game-0.1.0.0"
-datadir    = "/home/igoncalves/Projects/haskell-aulas/game/.cabal-sandbox/share/x86_64-linux-ghc-8.0.2/game-0.1.0.0"
-libexecdir = "/home/igoncalves/Projects/haskell-aulas/game/.cabal-sandbox/libexec"
-sysconfdir = "/home/igoncalves/Projects/haskell-aulas/game/.cabal-sandbox/etc"
+bindir     = "/home/may.mchdo/Documentos/Projetos/haskell-game/.cabal-sandbox/bin"
+libdir     = "/home/may.mchdo/Documentos/Projetos/haskell-game/.cabal-sandbox/lib/x86_64-linux-ghc-8.0.2/game-0.1.0.0"
+dynlibdir  = "/home/may.mchdo/Documentos/Projetos/haskell-game/.cabal-sandbox/lib/ghc-8.0.2/game-0.1.0.0"
+datadir    = "/home/may.mchdo/Documentos/Projetos/haskell-game/.cabal-sandbox/share/x86_64-linux-ghc-8.0.2/game-0.1.0.0"
+libexecdir = "/home/may.mchdo/Documentos/Projetos/haskell-game/.cabal-sandbox/libexec"
+sysconfdir = "/home/may.mchdo/Documentos/Projetos/haskell-game/.cabal-sandbox/etc"
 
 getBinDir, getLibDir, getDynLibDir, getDataDir, getLibexecDir, getSysconfDir :: IO FilePath
 getBinDir = catchIO (getEnv "game_bindir") (\_ -> return bindir)
