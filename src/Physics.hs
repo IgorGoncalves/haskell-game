@@ -7,7 +7,7 @@ updatePlayer:: Float -> Player -> Player
 updatePlayer dt (Player (px, py) (pvx,pvy) (pw, ph)) = 
         Player (px, py') (pvx, pvy) (pw, ph)
         where
-            py' = py + dt * pvy
+            py' = if((py + dt * pvy) < 250 && (py + dt * pvy) > -250 ) then py + dt * pvy else py
 
 updateBall :: Float -> Ball -> Ball
 updateBall dt (Ball (x, y) (dx, dy) r) = Ball (nx, ny) (ndx, ndy) r
