@@ -15,11 +15,11 @@ import Graphics.Gloss.Interface.Pure.Display
 
 
 initialWorld :: ContexWorld
-initialWorld = Play (Player (-270,0) (0, 0) (10, 70)) 
-                    (Player (270,0) (0, 80) (10, 70))
-                    (Ball (0,0) (-100, 50) 15)
-                    (Goal (-275, 0) 0 (10, 180))
-                    (Goal (275, 0) 1 (10, 180))
+initialWorld = Play (Player (-280,0) (0, 0) (10, 70)) 
+                    (Player (282,0) (0, 80) (10, 70))
+                    (Ball (0,0) (100, 40) 15)
+                    (Goal (-281, 0) 0 (10, 180))
+                    (Goal (280, 0) 1 (10, 180))
 
 drawWorld :: ContexWorld -> Picture
 drawWorld (GameOver w) = pictures [
