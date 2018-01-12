@@ -32,7 +32,12 @@ drawWorld (GameOver w) = pictures [
                     . translate (-400) (-125)
                     . color green
                     . text 
-                    $ w ]
+                    $ w ,
+                    scale 0.2 0.2 
+                    . translate (-600) (-650)
+                    . color white
+                    . text 
+                    $ "Press R to restart"]
 
 drawWorld (Play (Player (px,py) (pvx,pvy) (pw, ph))
                 (Player (pcx,pcy) (pcvx,pcvy) (pcw, pch))
@@ -41,7 +46,7 @@ drawWorld (Play (Player (px,py) (pvx,pvy) (pw, ph))
                 (Goal (gcx,gcy) jc (gcw, gch))) 
     = pictures [arena, goal, cgoal,  myPlayer,cPlayer ,ball]
     where 
-        arena = color white (pictures [translate 0 0 (rectangleWire 550 550)])        
+        arena = color white (pictures [translate 0 0 (rectangleWire 570 570)])        
         myPlayer = color red (pictures [translate px py (rectangleSolid pw ph)])
         cPlayer = color red (pictures [translate pcx pcy (rectangleSolid pcw pch)])
         ball = color red (pictures [translate x y (circle r)])
