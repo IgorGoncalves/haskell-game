@@ -1,3 +1,5 @@
 .cabal-sandbox/
 dist/
-LICENSE 
+*.exe
+*.o
+*.hi
